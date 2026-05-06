@@ -131,9 +131,23 @@ curl --location 'http://localhost:8000/api/v1/incidents' \
     "title": "Falla en conexión a VPN",
     "description": "Los usuarios de la sede central no pueden conectarse a la VPN corporativa desde las 08:00 AM.",
     "severity": "Alta",
-    "reporter_email": "usuario@cajaica.pe"
+    "reporter_email": "ejemplo@gmail.com"
 }' 
 ```
+
+**Ejemplo de Respuesta (201 Created):**
+```json
+{
+    "id": 1,
+    "title": "Falla en conexión a VPN",
+    "description": "Los usuarios de la sede central no pueden conectarse a la VPN corporativa desde las 08:00 AM.",
+    "severity": "Alta",
+    "reporter_email": "ejemplo@gmail.com",
+    "status": "Abierto",
+    "created_at": "2026-05-06T10:30:00Z"
+}
+```
+
 
 #### 2. Listar todos los incidentes
 *   **Ruta:** `GET /incidents`
@@ -142,3 +156,82 @@ curl --location 'http://localhost:8000/api/v1/incidents' \
 **Ejemplo de Petición (cURL):**
 ```bash
 curl --location 'http://localhost:8000/api/v1/incidents'
+```
+
+**Ejemplo de Respuesta (200 OK)**
+```json
+[
+    {
+        "id": 1,
+        "title": "Falla en conexión a VPN",
+        "severity": "Alta",
+        "status": "Abierto",
+        "created_at": "2026-05-06T10:30:00Z"
+    },
+    {
+        "id": 2,
+        "title": "Reinicio inesperado del servidor de base de datos",
+        "severity": "Crítica",
+        "status": "En Progreso",
+        "created_at": "2026-05-05T15:45:00Z"
+    }
+]
+```
+
+#### 3. Consultar un incidente específico por ID
+*   **Ruta:** `GET /incidents/{id}`
+*   **Descripción:** Obtiene los detalles completos de un incidente específico utilizando su identificador único.
+
+**Ejemplo de Petición (cURL):**
+```bash
+curl --location 'http://localhost:8000/api/v1/incidents/1'
+```
+
+**Ejemplo de Respuesta (200 OK):**
+```json
+{
+    "id": 1,
+    "title": "Falla en conexión a VPN",
+    "description": "mmmm"
+}
+```
+
+**Ejemplo de Respuesta de Error (404 Not Found):**
+```json
+{
+    "detail": "Incidente con ID 1 no encontrado."
+}
+```
+
+### 📂 Estructura Detallada del Repositorio
+
+El proyecto mantiene una estructura de directorios limpia y escalable. A continuación, se detalla la organización de los archivos principales:
+
+```text
+.
+├── app/
+│   ├── api/
+│   │   └── v1/
+│   │       └── routes/
+│   │           ├── health.py               # Endpoint de diagnóstico para Docker
+│   │           └── incident.py             # Endpoints HTTP de incidentes
+│   ├── core/
+│   │   ├── config.py                       # Carga de variables de entorno
+│   │   └── exceptions.py                   # Manejo global de errores HTTP
+│   ├── db/
+│   │   ├── database.py                     # Configuración y conexión con PostgreSQL
+│   │   └── models.py                       # Entidades ORM (Tablas de base de datos)
+│   ├── repository/
+│   │   └── incident_repository.py          # Consultas a base de datos (CRUD)
+│   ├── schemas/
+│   │   └── incident.py                     # Contratos y validación de datos de entrada/salida
+│   ├── services/
+│   │   └── incident_service.py             # Lógica de negocio e intermediario API-BD
+│   └── main.py                             # Orquestador y punto de entrada de la API
+├── .env                                    # Archivo de variables de entorno (no versionado)
+├── docker-compose.yml                      # Orquestador de la infraestructura (API + BD)
+├── Dockerfile                              # Receta de construcción de la imagen Python/Alpine
+├── requirements.txt                        # Lista de dependencias del proyecto
+└── README.md                               # Documentación general y técnica
+```
+
