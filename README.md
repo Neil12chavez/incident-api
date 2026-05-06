@@ -39,3 +39,76 @@ Para garantizar un código limpio, mantenible y escalable, la solución no consi
     Implementación de un manejo centralizado de excepciones para devolver respuestas HTTP estandarizadas y un sistema de logs para registrar la actividad de la API.
 5.  **Optimización de Infraestructura:**
     Uso de un `Dockerfile` basado en Alpine Linux para reducir el tamaño de la imagen final y un `docker-compose.yml` que orquesta la API con su base de datos.
+
+---
+
+### 🏗️ Arquitectura y Flujo de Desarrollo (Deep Dive)
+
+Para garantizar un código ordenado y escalable, el desarrollo no se realizó en un solo archivo. Se utilizó una **Arquitectura de N Capas**, construyendo el proyecto desde la capa de datos hacia la capa de presentación web. 
+
+Aqui detallo como realice la creación de cada módulo:
+
+#### 1. Los Cimientos: Configuración y Base de Datos (`core/` y `db/`)
+El primer paso fue establecer la conexión con PostgreSQL y definir la estructura de la base de datos.
+*   **`core/config.py` y `.env`**: Se crearon para centralizar la lectura de variables de entorno (como `DATABASE_URL`). Esto asegura que las credenciales no estén en el código fuente.
+*   **`db/database.py`**: Aquí se configuró el motor de la base de datos y la sesión. Sirve como el puente principal para que la aplicación pueda ejecutar transacciones.
+*   **`db/models.py`**: Se definió el modelo de la entidad `Incident` (ORM). Este archivo mapea la clase de Python directamente a la tabla física en PostgreSQL.
+
+#### 2. La Validación: Contratos de Datos (`schemas/`)
+Antes de recibir información del usuario, necesitábamos definir qué datos son válidos.
+*   **`schemas/incident.py`**: Se crearon los esquemas de validación (generalmente usando librerías como Pydantic/Marshmallow). 
+    *   *¿Para qué sirve?* Define un esquema para crear incidentes (exigiendo título, descripción, etc.) y otro para responder (excluyendo datos sensibles y formateando fechas). Se importa en las rutas para validar automáticamente el cuerpo de la petición (Payload).
+
+#### 3. Acceso a Datos: El Patrón Repositorio (`repository/`)
+Para no acoplar la lógica de negocio directamente con el ORM de la base de datos, creamos una capa intermedia.
+*   **`repository/incident_repository.py`**: Contiene las operaciones CRUD puras (Crear, Leer, Buscar por ID). 
+    *   *¿Por qué hacerlo así?* Si en el futuro cambiamos PostgreSQL por MongoDB, solo modificamos este archivo, dejando el resto de la aplicación intacta. Este módulo importa `models.py` y la sesión de `database.py`.
+
+#### 4. La Lógica de Negocio (`services/`)
+Aquí es donde reside el "cerebro" de la aplicación.
+*   **`services/incident_service.py`**: Intermediario entre la API y el repositorio. 
+    *   *Contexto:* Este servicio importa el repositorio. Si un usuario busca el incidente `ID=5` y no existe, el repositorio devuelve un dato vacío, pero el *servicio* es el encargado de lanzar un error "404 Not Found".
+
+#### 5. Exposición Web: Controladores y Rutas (`api/`)
+Una vez que el núcleo funcionaba, creamos las puertas de entrada HTTP.
+*   **`api/v1/routes/incident.py`**: Aquí se definen los endpoints exigidos por Caja Ica (`POST /incidents`, `GET /incidents`, `GET /incidents/{id}`).
+    *   *Flujo:* Este archivo importa los `schemas` (para validar lo que entra) y el `incident_service` (para procesar la petición). Aquí solo se gestiona la comunicación HTTP (recibir JSON, devolver JSON).
+*   **`api/v1/routes/health.py`**: Un endpoint adicional de buenas prácticas (`GET /health`) para que Docker y los balanceadores de carga puedan verificar si la API está viva.
+
+#### 6. El Ensamblaje Final: El Punto de Entrada (`main.py`)
+El último archivo en codificarse fue el orquestador principal.
+*   **`app/main.py`**: Es el archivo que arranca la aplicación. 
+    *   *¿Qué hace?* Importa las rutas de `incident.py` y `health.py` y las registra en el framework web. Además, inicializa el manejo de errores globales (`core/exceptions.py`) y la configuración de registros (`core/logger.py`) para tener observabilidad en la consola de Docker.
+
+---
+
+### 🚀 Guía de Replicación y Despliegue
+
+Sigue estos pasos para levantar el proyecto en tu entorno local. Gracias a la contenerización, el proceso es sumamente sencillo y no requiere instalar Python ni PostgreSQL directamente en tu máquina.
+
+#### 1. Requisitos Previos
+
+Asegúrate de tener instaladas las siguientes herramientas:
+* **Docker Desktop**
+* **Git**
+* Una herramienta para consumir la API (**Postman**, **Insomnia** o la misma terminal usando `curl`).
+
+#### 2. Configuración del Entorno
+
+El proyecto utiliza variables de entorno para manejar las credenciales de manera segura. En la raíz del proyecto, debes contar con un archivo `.env`[cite: 2]. 
+
+#### 3. Ejecución del Entorno
+
+Para levantar toda la solución (el motor de PostgreSQL y la API) de forma orquestada, abre tu terminal en la raíz del proyecto y ejecuta el siguiente comando:
+
+`docker compose up --build`
+
+#### 4. Verificación del Despliegue
+
+Una vez que la terminal indique que los contenedores están en ejecución, puedes verificar que la aplicación está saludable realizando una petición GET al endpoint de diagnóstico:
+
+`curl http://localhost:8000/api/v1/health`
+
+---
+
+
