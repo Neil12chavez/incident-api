@@ -73,7 +73,7 @@ Aquí es donde reside el "cerebro" de la aplicación.
 
 #### 5. Exposición Web: Controladores y Rutas (`api/`)
 Una vez que el núcleo funcionaba, creamos las puertas de entrada HTTP.
-*   **`api/v1/routes/incident.py`**: Aquí se definen los endpoints exigidos por Caja Ica (`POST /incidents`, `GET /incidents`, `GET /incidents/{id}`).
+*   **`api/v1/routes/incident.py`**: Aquí se definen los endpoints (`POST /incidents`, `GET /incidents`, `GET /incidents/{id}`).
     *   *Flujo:* Este archivo importa los `schemas` (para validar lo que entra) y el `incident_service` (para procesar la petición). Aquí solo se gestiona la comunicación HTTP (recibir JSON, devolver JSON).
 *   **`api/v1/routes/health.py`**: Un endpoint adicional de buenas prácticas (`GET /health`) para que Docker y los balanceadores de carga puedan verificar si la API está viva.
 
