@@ -46,6 +46,8 @@ Para garantizar un código limpio, mantenible y escalable, la solución no consi
 
 Para garantizar un código ordenado y escalable, el desarrollo no se realizó en un solo archivo. Se utilizó una **Arquitectura de N Capas**, construyendo el proyecto desde la capa de datos hacia la capa de presentación web. 
 
+![Infraestructura](diagrama_incident.drawio.png)
+
 Aqui detallo como realice la creación de cada módulo:
 
 #### 1. Los Cimientos: Configuración y Base de Datos (`core/` y `db/`)
