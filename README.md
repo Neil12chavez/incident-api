@@ -101,13 +101,17 @@ El proyecto utiliza variables de entorno para manejar las credenciales de manera
 
 Para levantar toda la solución (el motor de PostgreSQL y la API) de forma orquestada, abre tu terminal en la raíz del proyecto y ejecuta el siguiente comando:
 
-`docker compose up --build`
+```bash
+docker compose up --build
+```
 
 #### 4. Verificación del Despliegue
 
 Una vez que la terminal indique que los contenedores están en ejecución, puedes verificar que la aplicación está saludable realizando una petición GET al endpoint de diagnóstico:
 
-`curl http://localhost:8000/api/v1/health`
+```bash
+curl http://localhost:8000/api/v1/health
+```
 
 ---
 
@@ -130,3 +134,11 @@ curl --location 'http://localhost:8000/api/v1/incidents' \
     "reporter_email": "usuario@cajaica.pe"
 }' 
 ```
+
+#### 2. Listar todos los incidentes
+*   **Ruta:** `GET /incidents`
+*   **Descripción:** Retorna una lista con todos los incidentes registrados en la base de datos.
+
+**Ejemplo de Petición (cURL):**
+```bash
+curl --location 'http://localhost:8000/api/v1/incidents'
