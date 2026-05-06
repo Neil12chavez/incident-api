@@ -111,4 +111,22 @@ Una vez que la terminal indique que los contenedores están en ejecución, puede
 
 ---
 
+### 📡 Documentación de la API (Endpoints)
 
+La API expone los siguientes endpoints RESTful para la gestión de incidentes TI, consumiendo y produciendo formato JSON.
+
+#### 1. Registrar un nuevo incidente
+*   **Ruta:** `POST /incidents`
+*   **Descripción:** Crea un nuevo registro de incidente tecnológico en el sistema.
+
+**Ejemplo de Petición (cURL):**
+```bash
+curl --location 'http://localhost:8000/api/v1/incidents' \
+--header 'Content-Type: application/json' \
+--data '{
+    "title": "Falla en conexión a VPN",
+    "description": "Los usuarios de la sede central no pueden conectarse a la VPN corporativa desde las 08:00 AM.",
+    "severity": "Alta",
+    "reporter_email": "usuario@cajaica.pe"
+}' 
+```
