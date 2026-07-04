@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: incident-api-deployment
+spec:
+  replicas: 2 # ¡Aquí entra la magia! Tendrás 2 copias de tu API corriendo.
+  selector:
+    matchLabels:
+      app: incident-api
+  template:
+    metadata:
+      labels:
+        app: incident-api
+    spec:
+      containers:
+        - name: incident-api
+          image: neilchvz/incident-api:v1 # Usa la imagen del Paso 1
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: db-credentials
+          env:
+            - name: DATABASE_URL # Asegúrate de que el nombre coincida con lo que espera tu app
+              value: "postgresql://user:password@db:5432/incidents_db"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: incident-api-service
+spec:
+  type: LoadBalancer # Esto te dará una IP pública para acceder a la API
+  selector:
+    app: incident-api
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
