@@ -3,7 +3,7 @@ name: Continuous Integration Pipeline
 # El pipeline se activa ante cualquier push o pull request en las ramas principales
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main", "develop", "feature/*" ] # Ahora reaccionará a tus pushes en ramas de feature
   pull_request:
     branches: [ "main", "develop" ]
 
